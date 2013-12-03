@@ -113,6 +113,7 @@ public class DatabaseConnectionParamsPanel extends JPanel implements Initializin
         di.setQuery(query.getText());
         di.setUrl(url.getText());
         di.setUsername(username.getText());
+        di.setSalt(salt.getText());
         di.addListener(this);
 
         new Thread(di).start();

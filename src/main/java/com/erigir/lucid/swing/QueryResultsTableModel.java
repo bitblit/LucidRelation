@@ -19,15 +19,13 @@ import java.util.Map;
  */
 public class QueryResultsTableModel extends AbstractTableModel {
 
-    private ScoreDoc[] docs;
+    private List<Document> docs;
     private Map<String,String> fields;
     private List<String> fieldList;
-    private IndexSearcher searcher;
 
-    public QueryResultsTableModel(IndexSearcher searcher, ScoreDoc[] docs, Map<String,String> fields)
+    public QueryResultsTableModel(List<Document> docs, Map<String,String> fields)
     {
         super();
-        this.searcher = searcher;
         this.docs = docs;
         this.fields = fields;
         this.fieldList = new ArrayList<String>(fields.size());
@@ -36,40 +34,25 @@ public class QueryResultsTableModel extends AbstractTableModel {
 
     @Override
     public int getRowCount() {
-        return docs.length;
+        return docs.size();
     }
 
     @Override
     public int getColumnCount() {
-        return fieldList.size()+1;
+        return fieldList.size();
     }
 
     @Override
     public Object getValueAt(int i, int i2) {
-        try
-        {
-            ScoreDoc row = docs[i];
-            Document doc = searcher.doc(row.doc);
+            Document doc = docs.get(i);
 
-            if (i2>0)
-            {
-                String fieldName = fieldList.get(i2 - 1);
+                String fieldName = fieldList.get(i2 );
                 IndexableField f = doc.getField(fieldName);
                 return (f==null)?null:f.stringValue();
-            }
-            else
-            {
-                return row.doc;
-            }
-        }
-        catch (IOException ioe)
-        {
-            return "IOE:"+ioe;
-        }
     }
 
     @Override
     public String getColumnName(int i) {
-        return (i==0)?"DOCID":fieldList.get(i-1);
+        return fieldList.get(i);
     }
 }
