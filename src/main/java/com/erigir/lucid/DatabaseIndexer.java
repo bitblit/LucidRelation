@@ -1,5 +1,7 @@
 package com.erigir.lucid;
 
+import com.erigir.lucid.modifier.CompoundModifier;
+import com.erigir.lucid.modifier.IStringModifier;
 import com.jolbox.bonecp.BoneCPDataSource;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -31,6 +33,7 @@ public class DatabaseIndexer implements Runnable {
 
     private String query;
     private File targetDirectory;
+    private String salt;
     private List<RowProcessingListener> listeners = new LinkedList<RowProcessingListener>();
 
     public LuceneIndexingRowCallbackHandler createHandler()
@@ -40,6 +43,20 @@ public class DatabaseIndexer implements Runnable {
         handle.setListeners(listeners);
         return handle;
     }
+
+    private IStringModifier createModifier()
+    {
+        if (true)
+        {
+            return new CompoundModifier();
+        }
+        else
+        {
+            LOG.info("Not creating modifier");
+        }
+    }
+
+
 
     public void run()
     {
@@ -120,4 +137,7 @@ public class DatabaseIndexer implements Runnable {
         listeners.add(listener);
     }
 
+    public void setSalt(String salt) {
+        this.salt = salt;
+    }
 }

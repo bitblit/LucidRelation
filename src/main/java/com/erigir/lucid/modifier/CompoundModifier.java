@@ -10,6 +10,8 @@ import java.util.List;
 public class CompoundModifier implements IStringModifier {
     private List<IStringModifier> modifierList;
 
+
+
     @Override
     public String modify(String body) {
         String rval = body;

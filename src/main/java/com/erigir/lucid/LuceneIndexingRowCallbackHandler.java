@@ -1,5 +1,7 @@
 package com.erigir.lucid;
 
+import com.erigir.lucid.modifier.CompoundModifier;
+import com.erigir.lucid.modifier.IStringModifier;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.*;
 import org.apache.lucene.index.IndexWriter;
@@ -40,7 +42,7 @@ public class LuceneIndexingRowCallbackHandler implements RowCallbackHandler {
     private Directory index;
     private IndexWriter writer;
 
-
+    private IStringModifier modifier;
 
     @Override
     public void processRow(ResultSet resultSet) throws SQLException {
@@ -84,6 +86,11 @@ public class LuceneIndexingRowCallbackHandler implements RowCallbackHandler {
                 {
                     LOG.trace("Storing field {}/{} = {}", new Object[]{e.getKey(),e.getValue(),value});
                     String sValue = String.valueOf(value);
+                    if (modifier!=null)
+                    {
+                        // Clean up input data
+                        sValue = modifier.modify(sValue);
+                    }
                     doc.add(new StringField(e.getKey(), sValue, Field.Store.YES));
                 }
             }
@@ -230,5 +237,9 @@ public class LuceneIndexingRowCallbackHandler implements RowCallbackHandler {
 
     public void setListeners(List<RowProcessingListener> listeners) {
         this.listeners = (listeners==null)?Collections.EMPTY_LIST:listeners;
+    }
+
+    public void setModifier(IStringModifier modifier) {
+        this.modifier = modifier;
     }
 }

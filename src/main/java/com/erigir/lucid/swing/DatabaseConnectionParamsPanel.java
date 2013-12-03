@@ -32,6 +32,7 @@ public class DatabaseConnectionParamsPanel extends JPanel implements Initializin
     private JTextField username = new JTextField("user");
     private JPasswordField password = new JPasswordField("");
     private JLabel processingMessage = new JLabel("Not Running");
+    private JTextField salt = new JTextField("salt");
 
     private JTextArea query = new JTextArea("select 1");
     private JTextField idColumnName = new JTextField();
@@ -50,6 +51,8 @@ public class DatabaseConnectionParamsPanel extends JPanel implements Initializin
         databasePanel.add(username);
         databasePanel.add(new JLabel("Password"));
         databasePanel.add(password);
+        databasePanel.add(new JLabel("Salt"));
+        databasePanel.add(salt);
 
         JPanel queryPanel = new JPanel(new GridLayout(0,2));
         queryPanel.add(new JLabel("Id Column Name"));
@@ -81,7 +84,7 @@ public class DatabaseConnectionParamsPanel extends JPanel implements Initializin
         });
 
         // See if we can preload from properties file
-        File pre = new File(System.getProperty("user.dir")+File.separator+".lucid-pre-properties");
+        File pre = new File(System.getProperty("user.home")+File.separator+".lucid-pre-properties");
         if (pre.exists() && pre.isFile())
         {
             LOG.info("Preloading from properties");
@@ -94,6 +97,7 @@ public class DatabaseConnectionParamsPanel extends JPanel implements Initializin
             password.setText((props.getProperty("password")==null)?password.getText():props.getProperty("password"));
             query.setText((props.getProperty("query")==null)?query.getText():props.getProperty("query"));
             targetDirectory.setText((props.getProperty("targetDirectory")==null)?targetDirectory.getText():props.getProperty("targetDirectory"));
+            salt.setText((props.getProperty("salt")==null)?salt.getText():props.getProperty("salt"));
         }
 
     }
