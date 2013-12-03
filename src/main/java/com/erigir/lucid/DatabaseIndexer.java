@@ -1,7 +1,9 @@
 package com.erigir.lucid;
 
 import com.erigir.lucid.modifier.CompoundModifier;
+import com.erigir.lucid.modifier.EmailHasher;
 import com.erigir.lucid.modifier.IStringModifier;
+import com.erigir.lucid.modifier.SaltedHashingRegexModifier;
 import com.jolbox.bonecp.BoneCPDataSource;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -17,6 +19,7 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -41,19 +44,27 @@ public class DatabaseIndexer implements Runnable {
         LuceneIndexingRowCallbackHandler handle = new LuceneIndexingRowCallbackHandler();
         handle.setDirectory(targetDirectory);
         handle.setListeners(listeners);
+        handle.setModifier(createModifier());
         return handle;
     }
 
     private IStringModifier createModifier()
     {
+        IStringModifier rval = null;
         if (true)
         {
-            return new CompoundModifier();
+            List<IStringModifier> mods = new LinkedList<IStringModifier>();
+            mods.add(SaltedHashingRegexModifier.createCreditCardModifier(salt));
+            mods.add(SaltedHashingRegexModifier.createSSNModifier(salt));
+            mods.add(new EmailHasher(salt));
+
+            rval= new CompoundModifier(mods);
         }
         else
         {
             LOG.info("Not creating modifier");
         }
+        return rval;
     }
 
 

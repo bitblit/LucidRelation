@@ -8,9 +8,14 @@ import java.util.List;
  * Time: 3:41 PM
  */
 public class CompoundModifier implements IStringModifier {
-    private List<IStringModifier> modifierList;
+    private List<? extends IStringModifier> modifierList;
 
+    public CompoundModifier() {
+    }
 
+    public CompoundModifier(List<IStringModifier> modifierList) {
+        this.modifierList = modifierList;
+    }
 
     @Override
     public String modify(String body) {
