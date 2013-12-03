@@ -97,7 +97,7 @@ public class DatabaseIndexer implements Runnable {
         }
         catch (Exception e)
         {
-            JOptionPane.showMessageDialog(null,"Failed to test connection : "+e);
+            throw new IllegalStateException("Error opening connection",e);
         }
         finally
         {
@@ -109,7 +109,7 @@ public class DatabaseIndexer implements Runnable {
                 }
                 catch (SQLException se)
                 {
-                    JOptionPane.showMessageDialog(null,"Ugh.  Couldn't even close connection right : "+se);
+                    throw new IllegalStateException("Ugh.  Couldn't even close connection right : ",se);
                 }
             }
             if (ds!=null)
