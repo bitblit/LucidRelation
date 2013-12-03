@@ -5,27 +5,28 @@
        xmlns:c="http://www.springframework.org/schema/c" xmlns:util="http://www.springframework.org/schema/util"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
 
-    <bean id="clientMainFrame" class="com.erigir.lucid.LucidRelationMainFrame"
+    <bean id="clientMainFrame" class="com.erigir.lucid.swing.LucidRelationMainFrame"
           p:mainPanel-ref="mainPanel"
           p:mainMenuBar-ref="mainMenuBar" />
 
-    <bean id="mainPanel" class="com.erigir.lucid.MainPanel"
+    <bean id="mainPanel" class="com.erigir.lucid.swing.MainPanel"
           p:databaseConnectionParamsPanel-ref="databaseConnectionParamsPanel"
           p:searchPanel-ref="searchPanel"
     />
 
 
-    <bean id="mainMenuBar" class="com.erigir.lucid.MainMenuBar"
+    <bean id="mainMenuBar" class="com.erigir.lucid.swing.MainMenuBar"
           p:mainFrame-ref="clientMainFrame"
           p:viewLogFileAction-ref="viewLogFileAction"
           p:testLuceneAction-ref="testLuceneAction"
             />
 
-    <bean id="databaseConnectionParamsPanel" class="com.erigir.lucid.DatabaseConnectionParamsPanel" />
-    <bean id="searchPanel" class="com.erigir.lucid.SearchPanel" />
+    <bean id="databaseConnectionParamsPanel" class="com.erigir.lucid.swing.DatabaseConnectionParamsPanel" />
+    <bean id="searchPanel" class="com.erigir.lucid.swing.SearchPanel"
+            p:objectMapper-ref="objectMapper"/>
 
     <!-- Actions -->
-    <bean id="viewLogFileAction" class="com.erigir.lucid.action.ViewLogFileAction" />
-    <bean id="testLuceneAction" class="com.erigir.lucid.action.TestLuceneAction" />
+    <bean id="viewLogFileAction" class="com.erigir.lucid.swing.ViewLogFileAction" />
+    <bean id="testLuceneAction" class="com.erigir.lucid.swing.TestLuceneAction" />
 
 </beans>

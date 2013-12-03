@@ -86,6 +86,11 @@
             <version>2.0.1</version>
         </dependency>
         <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+            <version>20041127.091804</version>
+        </dependency>
+        <dependency>
             <groupId>com.jolbox</groupId>
             <artifactId>bonecp</artifactId>
             <version>0.8.0.RELEASE</version>
@@ -161,7 +166,7 @@
                         <transformer
                                 implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                             <manifestEntries>
-                              <Main-Class>com.erigir.lucid.LucidRelationSwing</Main-Class>
+                              <Main-Class>com.erigir.lucid.swing.LucidRelationSwing</Main-Class>
                               <Build-Number>1</Build-Number>
                               <SplashScreen-Image>lucid-splash.jpg</SplashScreen-Image>
                             </manifestEntries>
