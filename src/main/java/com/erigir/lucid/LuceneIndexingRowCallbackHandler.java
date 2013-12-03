@@ -1,6 +1,5 @@
 package com.erigir.lucid;
 
-import com.erigir.lucid.modifier.CompoundModifier;
 import com.erigir.lucid.modifier.IStringModifier;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.*;

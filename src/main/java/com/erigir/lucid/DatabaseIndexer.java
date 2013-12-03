@@ -1,21 +1,11 @@
 package com.erigir.lucid;
 
-import com.erigir.lucid.modifier.CompoundModifier;
-import com.erigir.lucid.modifier.EmailHasher;
-import com.erigir.lucid.modifier.IStringModifier;
-import com.erigir.lucid.modifier.SaltedHashingRegexModifier;
+import com.erigir.lucid.modifier.*;
 import com.jolbox.bonecp.BoneCPDataSource;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowCallbackHandler;
 
-import javax.swing.*;
-
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -53,12 +43,12 @@ public class DatabaseIndexer implements Runnable {
         IStringModifier rval = null;
         if (true)
         {
-            List<IStringModifier> mods = new LinkedList<IStringModifier>();
-            mods.add(SaltedHashingRegexModifier.createCreditCardModifier(salt));
-            mods.add(SaltedHashingRegexModifier.createSSNModifier(salt));
-            mods.add(new EmailHasher(salt));
+            List<ScanAndReplace> mods = Arrays.asList(
+            new ScanAndReplace(RegexStringFinder.SSN_FINDER, new SaltedHashingModifier("monosodiumglutamate"))
+            ,new ScanAndReplace(RegexStringFinder.CREDIT_CARD_FINDER, new SaltedHashingModifier("monosodiumglutamate"))
+            ,new ScanAndReplace(new EmailStringFinder(), new SaltedHashingModifier("monosodiumglutamate")));
 
-            rval= new CompoundModifier(mods);
+            rval= new CompoundScanAndReplace(mods);
         }
         else
         {
