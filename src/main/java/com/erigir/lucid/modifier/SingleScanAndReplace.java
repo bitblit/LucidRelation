@@ -3,24 +3,21 @@ package com.erigir.lucid.modifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 /**
  * User: chrweiss
  * Date: 8/12/13
  * Time: 3:43 PM
  */
-public class ScanAndReplace  {
-    private static final Logger LOG = LoggerFactory.getLogger(ScanAndReplace.class);
+public class SingleScanAndReplace implements IScanAndReplace {
+    private static final Logger LOG = LoggerFactory.getLogger(SingleScanAndReplace.class);
 
     private IStringFinder finder;
     private IStringModifier modifier;
 
-    public ScanAndReplace() {
+    public SingleScanAndReplace() {
     }
 
-    public ScanAndReplace(IStringFinder finder, IStringModifier modifier) {
+    public SingleScanAndReplace(IStringFinder finder, IStringModifier modifier) {
         this.finder = finder;
         this.modifier = modifier;
     }
@@ -42,6 +39,7 @@ public class ScanAndReplace  {
         this.finder = finder;
     }
 
+    @Override
     public String performScanAndReplace(String value)
     {
         String rval = value;
@@ -54,6 +52,10 @@ public class ScanAndReplace  {
             MatchLocation next = finder.find(work);
             while (next!=null)
             {
+                if (!matchLocationValid(work, next))
+                {
+                    throw new IllegalStateException("Bad match location");
+                }
                 sb.append(work.substring(0, next.getStart()));
                 sb.append(modifier.modify(work.substring(next.getStart(), next.getEnd())));
                 work = (next.getEnd()==work.length())?"":work.substring(next.getEnd());
@@ -70,5 +72,19 @@ public class ScanAndReplace  {
         return rval;
     }
 
+    private boolean matchLocationValid(String string, MatchLocation match)
+    {
+        boolean rval = true;
+        if (string!=null && match!=null)
+        {
+            rval = match.getStart()>=0 && match.getEnd()<=string.length();
+            if (!rval)
+            {
+                LOG.warn("Warning - invalid match found from finder {} against string '{}' - was {}", new Object[]{finder.getClass(), string, match});
+            }
+        }
+
+        return rval;
+    }
 
 }

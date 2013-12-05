@@ -1,6 +1,8 @@
 package com.erigir.lucid;
 
+import com.erigir.lucid.modifier.IScanAndReplace;
 import com.erigir.lucid.modifier.IStringModifier;
+import org.apache.commons.io.FileUtils;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.*;
 import org.apache.lucene.index.IndexWriter;
@@ -34,14 +36,17 @@ public class LuceneIndexingRowCallbackHandler implements RowCallbackHandler {
     private File directory;
     private String idColumnName;
     private Map<String,Class> columns;
+    private int columnCount=-1;
+
     private List<RowProcessingListener> listeners = new LinkedList<RowProcessingListener>();
+    private Map<String,ICustomFieldProcessor> customProcessors = new TreeMap<String, ICustomFieldProcessor>();
 
     private StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_46);
     private IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_46, analyzer);
     private Directory index;
     private IndexWriter writer;
 
-    private IStringModifier modifier;
+    private IScanAndReplace postProcessor;
 
     @Override
     public void processRow(ResultSet resultSet) throws SQLException {
@@ -51,46 +56,57 @@ public class LuceneIndexingRowCallbackHandler implements RowCallbackHandler {
         initColumnData(resultSet);
 
         Document doc = new Document();
-        for (Map.Entry<String,Class>e:columns.entrySet())
+        
+        ResultSetMetaData rsmd = resultSet.getMetaData();
+        for (int i=1;i<=columnCount;i++)
         {
-            Object value = resultSet.getObject(e.getKey());
+            String name = rsmd.getColumnName(i);
+            Object value = resultSet.getObject(name);
+       
             if (value!=null)
             {
-                if (Double.class.isAssignableFrom(e.getValue()))
+                Class valClazz = value.getClass();
+
+                ICustomFieldProcessor custom = customProcessors.get(name);
+                if (custom!=null)
                 {
-                    LOG.trace("Storing Double field {} = {}", e.getKey(), value);
-                    doc.add(new DoubleField(e.getKey(),(Double)value, Field.Store.YES));
+                    columns.putAll(custom.process(name, value, doc));
                 }
-                else if (Long.class.isAssignableFrom(e.getValue()))
+                else if (Double.class.isAssignableFrom(valClazz))
                 {
-                    LOG.trace("Storing Long field {} = {}", e.getKey(),value);
-                    doc.add(new LongField(e.getKey(),(Long)value, Field.Store.YES));
+                    LOG.trace("Storing Double field {} = {}", name, value);
+                    doc.add(new DoubleField(name,(Double)value, Field.Store.YES));
                 }
-                else if (Integer.class.isAssignableFrom(e.getValue()))
+                else if (Long.class.isAssignableFrom(valClazz))
                 {
-                    LOG.trace("Storing Int field {} = {}", e.getKey(),value);
-                    doc.add(new IntField(e.getKey(),(Integer)value, Field.Store.YES));
+                    LOG.trace("Storing Long field {} = {}", name,value);
+                    doc.add(new LongField(name,(Long)value, Field.Store.YES));
                 }
-                else if (Float.class.isAssignableFrom(e.getValue()))
+                else if (Integer.class.isAssignableFrom(valClazz))
                 {
-                    LOG.trace("Storing Float field {} = {}", e.getKey(),value);
-                    doc.add(new FloatField(e.getKey(),(Float)value, Field.Store.YES));
+                    LOG.trace("Storing Int field {} = {}", name,value);
+                    doc.add(new IntField(name,(Integer)value, Field.Store.YES));
                 }
-                else if (Date.class.isAssignableFrom(e.getValue()))
+                else if (Float.class.isAssignableFrom(valClazz))
                 {
-                    LOG.trace("Storing Date field {} = {}", e.getKey(),value);
-                    doc.add(new StringField(e.getKey(),dateFormat.format((Date) value), Field.Store.YES));
+                    LOG.trace("Storing Float field {} = {}", name,value);
+                    doc.add(new FloatField(name,(Float)value, Field.Store.YES));
+                }
+                else if (Date.class.isAssignableFrom(valClazz))
+                {
+                    LOG.trace("Storing Date field {} = {}", name,value);
+                    doc.add(new StringField(name,dateFormat.format((Date) value), Field.Store.YES));
                 }
                 else // default to string
                 {
-                    LOG.trace("Storing field {}/{} = {}", new Object[]{e.getKey(),e.getValue(),value});
+                    LOG.trace("Storing field {}/{} = {}", new Object[]{name,valClazz,value});
                     String sValue = String.valueOf(value);
-                    if (modifier!=null)
+                    if (postProcessor!=null)
                     {
                         // Clean up input data
-                        sValue = modifier.modify(sValue);
+                        sValue = postProcessor.performScanAndReplace(sValue);
                     }
-                    doc.add(new StringField(e.getKey(), sValue, Field.Store.YES));
+                    doc.add(new StringField(name, sValue, Field.Store.YES));
                 }
             }
 
@@ -106,7 +122,7 @@ public class LuceneIndexingRowCallbackHandler implements RowCallbackHandler {
             errorCount++;
         }
 
-        updateListeners(rowCount,null);
+        RowProcessedEvent.updateListeners(listeners, rowCount, null);
     }
 
     public void finish()
@@ -117,6 +133,7 @@ public class LuceneIndexingRowCallbackHandler implements RowCallbackHandler {
             {
                 writer.close();
             }
+            writeColumnsMetaFile();
 
         }
         catch (IOException ioe)
@@ -136,7 +153,15 @@ public class LuceneIndexingRowCallbackHandler implements RowCallbackHandler {
                 throw new IllegalArgumentException("Directory cannot be null");
             }
             LOG.info("Resetting directory");
-            directory.delete();
+
+            try
+            {
+                FileUtils.deleteDirectory(directory);
+            }
+            catch (IOException ioe)
+            {
+                LOG.info("Failed to delete directory!",ioe);
+            }
             directory.mkdirs();
 
             if (!directory.exists() || !directory.isDirectory())
@@ -166,7 +191,8 @@ public class LuceneIndexingRowCallbackHandler implements RowCallbackHandler {
         {
             columns = new TreeMap<String, Class>();
             ResultSetMetaData rsmd = rs.getMetaData();
-            for (int i=1;i<=rsmd.getColumnCount();i++)  // stupid jdbc ordering
+            columnCount=rsmd.getColumnCount();
+            for (int i=1;i<=columnCount;i++)  // stupid jdbc ordering
             {
                 try
                 {
@@ -186,19 +212,23 @@ public class LuceneIndexingRowCallbackHandler implements RowCallbackHandler {
                 throw new RuntimeException("Query doesnt contain id column :"+idColumnName+" only "+columns);
             }
 
-            try
-            {
-                // Write the column data to disk
-                File metaFile = new File(directory, FIELD_METADATA_FILE);
-                // TODO: inject this
-                ObjectMapper om = new ObjectMapper();
-                om.writeValue(metaFile, columns);
-            }
-            catch (IOException ioe)
-            {
-                throw new IllegalStateException("Couldnt write metadata file", ioe);
-            }
 
+        }
+    }
+    
+    public void writeColumnsMetaFile()
+    {
+        try
+        {
+            // Write the column data to disk
+            File metaFile = new File(directory, FIELD_METADATA_FILE);
+            // TODO: inject this
+            ObjectMapper om = new ObjectMapper();
+            om.writeValue(metaFile, columns);
+        }
+        catch (IOException ioe)
+        {
+            throw new IllegalStateException("Couldnt write metadata file", ioe);
         }
     }
 
@@ -208,15 +238,6 @@ public class LuceneIndexingRowCallbackHandler implements RowCallbackHandler {
     }
 
 
-    private void updateListeners(int row,String message)
-    {
-        LOG.trace("Publishing {} to {} listeners",row, listeners.size());
-        RowProcessedEvent e = new RowProcessedEvent(row, message);
-        for (RowProcessingListener l:listeners)
-        {
-            l.rowProcessed(e);
-        }
-    }
 
     public int getRowCount() {
         return rowCount;
@@ -238,7 +259,11 @@ public class LuceneIndexingRowCallbackHandler implements RowCallbackHandler {
         this.listeners = (listeners==null)?Collections.EMPTY_LIST:listeners;
     }
 
-    public void setModifier(IStringModifier modifier) {
-        this.modifier = modifier;
+    public void setPostProcessor(IScanAndReplace postProcessor) {
+        this.postProcessor = postProcessor;
+    }
+
+    public void setCustomProcessors(Map<String, ICustomFieldProcessor> customProcessors) {
+        this.customProcessors = customProcessors;
     }
 }

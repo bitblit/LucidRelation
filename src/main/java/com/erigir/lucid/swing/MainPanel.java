@@ -1,6 +1,5 @@
 package com.erigir.lucid.swing;
 
-import com.erigir.lucid.swing.DatabaseConnectionParamsPanel;
 import org.springframework.beans.factory.InitializingBean;
 
 import javax.swing.*;
@@ -12,7 +11,7 @@ import java.awt.*;
 public class MainPanel extends JPanel implements InitializingBean {
 
     private JTabbedPane tabbedPane;
-    private DatabaseConnectionParamsPanel databaseConnectionParamsPanel;
+    private IndexingPanel databaseConnectionParamsPanel;
     private SearchPanel searchPanel;
 
     @Override
@@ -34,7 +33,7 @@ public class MainPanel extends JPanel implements InitializingBean {
         this.tabbedPane = tabbedPane;
     }
 
-    public void setDatabaseConnectionParamsPanel(DatabaseConnectionParamsPanel databaseConnectionParamsPanel) {
+    public void setDatabaseConnectionParamsPanel(IndexingPanel databaseConnectionParamsPanel) {
         this.databaseConnectionParamsPanel = databaseConnectionParamsPanel;
     }
 

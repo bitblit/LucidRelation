@@ -1,5 +1,7 @@
 package com.erigir.lucid.modifier;
 
+import org.apache.commons.lang.builder.ToStringBuilder;
+
 /**
  * User: chrweiss
  * Date: 12/3/13
@@ -31,4 +33,10 @@ public class MatchLocation {
     public void setEnd(int end) {
         this.end = end;
     }
+
+    public String toString()
+    {
+        return ToStringBuilder.reflectionToString(this);
+    }
+
 }

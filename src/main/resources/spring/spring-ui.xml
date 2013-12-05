@@ -21,7 +21,7 @@
           p:testLuceneAction-ref="testLuceneAction"
             />
 
-    <bean id="databaseConnectionParamsPanel" class="com.erigir.lucid.swing.DatabaseConnectionParamsPanel" />
+    <bean id="databaseConnectionParamsPanel" class="com.erigir.lucid.swing.IndexingPanel" />
     <bean id="searchPanel" class="com.erigir.lucid.swing.SearchPanel"
             p:objectMapper-ref="objectMapper"/>
 

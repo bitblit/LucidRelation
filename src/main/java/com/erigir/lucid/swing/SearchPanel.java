@@ -49,7 +49,7 @@ public class SearchPanel extends JPanel implements InitializingBean {
     private JTextArea query = new JTextArea("select 1");
     private JTextField targetDirectory = new JTextField("lucidRelationOutput");
     private JButton runProcess = new JButton("Run Query");
-    private JButton showFirst = new JButton("Show First 10");
+    private JButton showFirst = new JButton("Show First 100");
     private JTable outputTable = new JTable();
     private ObjectMapper objectMapper;
 
@@ -66,8 +66,10 @@ public class SearchPanel extends JPanel implements InitializingBean {
         JScrollPane scrollPane = new JScrollPane(query);
         queryPanel.add(scrollPane);
 
-        outputTable.setPreferredScrollableViewportSize(new Dimension(400,100));
+        outputTable.setPreferredScrollableViewportSize(new Dimension(40000,100));
         JScrollPane outputTableScroll = new JScrollPane(outputTable);
+        outputTableScroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
+        outputTableScroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 
         setLayout(new BorderLayout());
         add(queryPanel, BorderLayout.NORTH);
@@ -117,7 +119,7 @@ public class SearchPanel extends JPanel implements InitializingBean {
 
                 List<Document> l = new LinkedList<Document>();
 
-                for (int i=0;i<reader.maxDoc() && l.size()<10;i++)
+                for (int i=0;i<reader.maxDoc() && l.size()<100;i++)
                 {
                     l.add(reader.document(i));
                 }

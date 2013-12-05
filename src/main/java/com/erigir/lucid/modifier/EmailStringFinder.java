@@ -1,5 +1,6 @@
 package com.erigir.lucid.modifier;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,10 +30,8 @@ public class EmailStringFinder implements IStringFinder {
         MatchLocation rval = null;
         if (body!=null)
         {
-            LOG.debug("Entering modify for email body length {}",body.length());
             rval = findNext(body,0);
         }
-        LOG.debug("Leaving email modify");
 
         return rval;
     }
@@ -53,7 +52,7 @@ public class EmailStringFinder implements IStringFinder {
                 {
                     String domain = input.substring(nextAt+1, nextWhitespace);
                     // No empty sections allowed in domains
-                    if (domain.contains(".") && !domain.contains("..") && !domain.startsWith(".") && !domain.endsWith("."))
+                    if (validDomainName(domain))
                     {
                         // If we reached here its a value domain!
                         // Scan backwards
@@ -87,7 +86,7 @@ public class EmailStringFinder implements IStringFinder {
 
         }
 
-        if (rval!=null && input!=null) // catch the bracketed case
+        if (rval!=null && input!=null && rval.getEnd()>0 && rval.getStart()>=0) // catch the bracketed case
         {
             if (input.charAt(rval.getStart())=='<' && input.charAt(rval.getEnd()-1)=='>')
             {
@@ -98,6 +97,25 @@ public class EmailStringFinder implements IStringFinder {
         }
 
         return rval;
+    }
+
+    public boolean validDomainName(String domain)
+    {
+        boolean rval = (domain.contains(".") && !domain.contains("..") && !domain.startsWith(".") && !domain.endsWith("."));
+
+        for (int i=0;i<domain.length() && rval;i++)
+        {
+            char c = domain.charAt(i);
+            rval = Character.isLetterOrDigit(c) || c=='.' || (i==domain.length()-1 && c=='>'); // ok, the last one is pretty kludgy
+        }
+
+        if (!rval)
+        {
+            LOG.debug("{} is not a valid domain - rejecting", domain);
+        }
+
+        return rval;
+
     }
 
 

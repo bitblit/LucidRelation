@@ -1,15 +1,13 @@
 package com.erigir.lucid.swing;
 
 import com.erigir.lucid.DatabaseIndexer;
+import com.erigir.lucid.ICustomFieldProcessor;
 import com.erigir.lucid.RowProcessedEvent;
 import com.erigir.lucid.RowProcessingListener;
-import com.jolbox.bonecp.BoneCPDataSource;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowCallbackHandler;
 
 import javax.swing.*;
 import java.awt.*;
@@ -17,15 +15,16 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileInputStream;
-import java.sql.Connection;
-import java.sql.SQLException;
+import java.io.StringReader;
+import java.util.Map;
 import java.util.Properties;
+import java.util.TreeMap;
 
 /**
  * cweiss : 5/26/12 1:26 PM
  */
-public class DatabaseConnectionParamsPanel extends JPanel implements InitializingBean, RowProcessingListener {
-    private static final Logger LOG = LoggerFactory.getLogger(DatabaseConnectionParamsPanel.class);
+public class IndexingPanel extends JPanel implements InitializingBean, RowProcessingListener {
+    private static final Logger LOG = LoggerFactory.getLogger(IndexingPanel.class);
 
     private JTextField url = new JTextField("jdbc:mysql://localhost:3306/db");
     private JTextField driver = new JTextField("com.mysql.jdbc.Driver");
@@ -35,6 +34,7 @@ public class DatabaseConnectionParamsPanel extends JPanel implements Initializin
     private JTextField salt = new JTextField("salt");
 
     private JTextArea query = new JTextArea("select 1");
+    private JTextArea customProcessors = new JTextArea("");
     private JTextField idColumnName = new JTextField();
     private JTextField targetDirectory = new JTextField("lucidRelationOutput");
     private JButton runProcess = new JButton("Run Query");
@@ -57,6 +57,12 @@ public class DatabaseConnectionParamsPanel extends JPanel implements Initializin
         JPanel queryPanel = new JPanel(new GridLayout(0,2));
         queryPanel.add(new JLabel("Id Column Name"));
         queryPanel.add(idColumnName);
+
+        queryPanel.add(new JLabel("Custom Processors"));
+        customProcessors.setPreferredSize(new Dimension(400, 100));
+        JScrollPane processorScrollPane = new JScrollPane(customProcessors);
+        queryPanel.add(processorScrollPane);
+
 
         queryPanel.add(new JLabel("Target Directory"));
         queryPanel.add(targetDirectory);
@@ -98,8 +104,34 @@ public class DatabaseConnectionParamsPanel extends JPanel implements Initializin
             query.setText((props.getProperty("query")==null)?query.getText():props.getProperty("query"));
             targetDirectory.setText((props.getProperty("targetDirectory")==null)?targetDirectory.getText():props.getProperty("targetDirectory"));
             salt.setText((props.getProperty("salt")==null)?salt.getText():props.getProperty("salt"));
+            customProcessors.setText((props.getProperty("customProcessors")==null)?customProcessors.getText():props.getProperty("customProcessors"));
         }
 
+    }
+
+    public Map<String, ICustomFieldProcessor> createCustomProcessorMap()
+    {
+        Map<String, ICustomFieldProcessor> rval = new TreeMap<String, ICustomFieldProcessor>();
+        try
+        {
+            if (StringUtils.trimToNull(customProcessors.getText())!=null)
+            {
+                Properties p = new Properties();
+                p.load(new StringReader(customProcessors.getText()));
+
+                for (Map.Entry<Object,Object> e:p.entrySet())
+                {
+                    String name = (String)e.getKey();
+                    Class c = Class.forName((String)e.getValue());
+                    rval.put(name, (ICustomFieldProcessor)c.newInstance());
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            JOptionPane.showMessageDialog(null,"Error processing customer processor:"+e);
+        }
+        return rval;
     }
 
 
@@ -115,6 +147,7 @@ public class DatabaseConnectionParamsPanel extends JPanel implements Initializin
         di.setUsername(username.getText());
         di.setSalt(salt.getText());
         di.addListener(this);
+        di.setCustomProcessors(createCustomProcessorMap());
 
         new Thread(di).start();
     }
