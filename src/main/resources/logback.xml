@@ -13,7 +13,7 @@
         </encoder>
     </appender>
 
-    <logger name="com.erigir" level="DEBUG"/>
+    <logger name="com.erigir" level="INFO"/>
 
     <root level="INFO">
         <appender-ref ref="STDOUT"/>

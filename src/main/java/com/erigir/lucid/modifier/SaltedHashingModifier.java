@@ -13,12 +13,14 @@ import org.apache.commons.codec.digest.DigestUtils;
  */
 public class SaltedHashingModifier implements IStringModifier {
     private String salt;
+    private String prefix;
 
     public SaltedHashingModifier() {
     }
 
-    public SaltedHashingModifier(String salt) {
+    public SaltedHashingModifier(String salt, String prefix) {
         this.salt = salt;
+        this.prefix = prefix;
     }
 
     public String getSalt() {
@@ -29,13 +31,22 @@ public class SaltedHashingModifier implements IStringModifier {
         this.salt = salt;
     }
 
+    public String getPrefix() {
+        return prefix;
+    }
+
+    public void setPrefix(String prefix) {
+        this.prefix = prefix;
+    }
+
     @Override
     public String modify(String body) {
         if (salt==null)
         {
             throw new IllegalArgumentException("Salt cannot be null");
         }
-        return DigestUtils.shaHex((salt + body).getBytes());
+        String hash = DigestUtils.shaHex((salt + body).getBytes());
+        return (prefix==null)?hash:prefix+hash;
     }
 
 

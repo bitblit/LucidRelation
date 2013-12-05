@@ -18,7 +18,7 @@ public class EmailHashingModifier extends SaltedHashingModifier {
     }
 
     public EmailHashingModifier(String salt, boolean domainMaintained) {
-        super(salt);
+        super(salt,null);
         this.domainMaintained = domainMaintained;
     }
 

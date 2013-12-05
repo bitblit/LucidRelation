@@ -52,9 +52,9 @@ public class DatabaseIndexer implements Runnable {
         {
             AtomicLong counter = new AtomicLong(0);
             List<SingleScanAndReplace> mods = Arrays.asList(
-            new SingleScanAndReplace(RegexStringFinder.SSN_FINDER, new CountingStringModifier("SSN:",counter))
-            ,new SingleScanAndReplace(RegexStringFinder.CREDIT_CARD_FINDER, new CountingStringModifier("CCARD:",counter))
-            ,new SingleScanAndReplace(new EmailStringFinder(), new CountingStringModifier("EMAIL:",counter)));
+            new SingleScanAndReplace(RegexStringFinder.SSN_FINDER, new SaltedHashingModifier(salt,"SSN:"))//  new CountingStringModifier("SSN:",counter))
+            ,new SingleScanAndReplace(RegexStringFinder.CREDIT_CARD_FINDER, new SaltedHashingModifier(salt,"CCARD:")) //new CountingStringModifier("CCARD:",counter))
+            ,new SingleScanAndReplace(new EmailStringFinder(), new SaltedHashingModifier(salt,"EMAIL:")));//new CountingStringModifier("EMAIL:",counter)));
 
             rval= new CompoundScanAndReplace(mods);
         }

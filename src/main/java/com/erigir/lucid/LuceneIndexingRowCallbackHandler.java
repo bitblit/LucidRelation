@@ -30,6 +30,8 @@ public class LuceneIndexingRowCallbackHandler implements RowCallbackHandler {
     private static final Logger LOG = LoggerFactory.getLogger(LuceneIndexingRowCallbackHandler.class);
     public static final String FIELD_METADATA_FILE="fieldMetadata.json";
 
+
+    private boolean resetDirectory = false;
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddhhmmss");
     private int rowCount = 0;
     private int errorCount = 0;
@@ -156,7 +158,11 @@ public class LuceneIndexingRowCallbackHandler implements RowCallbackHandler {
 
             try
             {
-                FileUtils.deleteDirectory(directory);
+                if (resetDirectory)
+                {
+                    LOG.info("Deleting {}",directory);
+                    FileUtils.deleteDirectory(directory);
+                }
             }
             catch (IOException ioe)
             {
@@ -265,5 +271,9 @@ public class LuceneIndexingRowCallbackHandler implements RowCallbackHandler {
 
     public void setCustomProcessors(Map<String, ICustomFieldProcessor> customProcessors) {
         this.customProcessors = customProcessors;
+    }
+
+    public void setResetDirectory(boolean resetDirectory) {
+        this.resetDirectory = resetDirectory;
     }
 }
