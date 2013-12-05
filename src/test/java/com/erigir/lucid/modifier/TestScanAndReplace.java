@@ -9,8 +9,8 @@ import static org.junit.Assert.assertEquals;
 
 public class TestScanAndReplace
 {
-    private SingleScanAndReplace ssnScanner = new SingleScanAndReplace(RegexStringFinder.SSN_FINDER, new SaltedHashingModifier("monosodiumglutamate"));
-    private SingleScanAndReplace ccardScanner = new SingleScanAndReplace(RegexStringFinder.CREDIT_CARD_FINDER, new SaltedHashingModifier("monosodiumglutamate"));
+    private SingleScanAndReplace ssnScanner = new SingleScanAndReplace(RegexStringFinder.SSN_FINDER, new SaltedHashingModifier("monosodiumglutamate",null));
+    private SingleScanAndReplace ccardScanner = new SingleScanAndReplace(RegexStringFinder.CREDIT_CARD_FINDER, new SaltedHashingModifier("monosodiumglutamate",null));
     private SingleScanAndReplace emailScanner = new SingleScanAndReplace(new EmailStringFinder(), new EmailHashingModifier("monosodiumglutamate",true));
     private AtomicLong counter = new AtomicLong(0);
     private SingleScanAndReplace emailCountScanner = new SingleScanAndReplace(new EmailStringFinder(), new CountingStringModifier("EMAIL:",counter));
