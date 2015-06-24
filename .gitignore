@@ -5,3 +5,4 @@ lucidRelationOutput
 *.iws
 target
 bulk.*
+.DS_Store
