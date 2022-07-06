@@ -1,6 +1,5 @@
 package com.erigir.lucid.modifier;
 
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,11 +12,11 @@ import org.slf4j.LoggerFactory;
  * 3) Looking backward from whitespace, there must be at least 2 characters until the first period
  * 4) There must be at least 1 period between @ and whitespace
  * 5) The period can't be the first character
- *
+ * <p>
  * If you reached here, then scan backward!
  * 1) If the first character is a double quote, just jump back to the previous doublequote
  * 2) Otherwise, scan back to the first whitespace
- *
+ * <p>
  * At this point what lies between is the email.  If any rule breaks, then repeat, looking for the next @ symbol
  * User: chrweiss
  * Date: 8/12/13
@@ -28,46 +27,38 @@ public class EmailStringFinder implements IStringFinder {
 
     public MatchLocation find(final String body) {
         MatchLocation rval = null;
-        if (body!=null)
-        {
-            rval = findNext(body,0);
+        if (body != null) {
+            rval = findNext(body, 0);
         }
 
         return rval;
     }
 
-    private MatchLocation findNext(String input, int startingFrom)
-    {
+    private MatchLocation findNext(String input, int startingFrom) {
         MatchLocation rval = null;
-        if (input!=null)
-        {
+        if (input != null) {
 
-            int nextAt = input.indexOf("@",startingFrom);
+            int nextAt = input.indexOf("@", startingFrom);
 
-            if (nextAt>0) // need at least 1 character before the @
+            if (nextAt > 0) // need at least 1 character before the @
             {
                 // Scan forward to whitespace
                 int nextWhitespace = findNextWhitespaceOrEnd(input, nextAt, 1);
-                if (nextWhitespace>(nextAt+4)) // bare minimum of 4 characters from @ till end
+                if (nextWhitespace > (nextAt + 4)) // bare minimum of 4 characters from @ till end
                 {
-                    String domain = input.substring(nextAt+1, nextWhitespace);
+                    String domain = input.substring(nextAt + 1, nextWhitespace);
                     // No empty sections allowed in domains
-                    if (validDomainName(domain))
-                    {
+                    if (validDomainName(domain)) {
                         // If we reached here its a value domain!
                         // Scan backwards
                         int startPoint = 0;
-                        if (input.charAt(nextAt-1)=='"')
-                        {
+                        if (input.charAt(nextAt - 1) == '"') {
                             // The double quote case
-                            startPoint = input.lastIndexOf('"', nextAt-2);
-                        }
-                        else
-                        {
+                            startPoint = input.lastIndexOf('"', nextAt - 2);
+                        } else {
                             // Scan for whitespace
                             startPoint = findNextWhitespaceOrEnd(input, nextAt, -1);
-                            if (startPoint>0)
-                            {
+                            if (startPoint > 0) {
                                 startPoint++; // if not start-of-string, we dont want the whitespace character
                             }
                         }
@@ -78,20 +69,18 @@ public class EmailStringFinder implements IStringFinder {
                 }
             }
 
-            if (rval==null && nextAt>-1)
-            {
+            if (rval == null && nextAt > -1) {
                 // We found an at, but not an email address.  Scan further forward
-                rval = findNext(input, nextAt+1);
+                rval = findNext(input, nextAt + 1);
             }
 
         }
 
-        if (rval!=null && input!=null && rval.getEnd()>0 && rval.getStart()>=0) // catch the bracketed case
+        if (rval != null && input != null && rval.getEnd() > 0 && rval.getStart() >= 0) // catch the bracketed case
         {
-            if (input.charAt(rval.getStart())=='<' && input.charAt(rval.getEnd()-1)=='>')
-            {
-                rval.setStart(rval.getStart()+1);
-                rval.setEnd(rval.getEnd()-1);
+            if (input.charAt(rval.getStart()) == '<' && input.charAt(rval.getEnd() - 1) == '>') {
+                rval.setStart(rval.getStart() + 1);
+                rval.setEnd(rval.getEnd() - 1);
             }
 
         }
@@ -99,18 +88,15 @@ public class EmailStringFinder implements IStringFinder {
         return rval;
     }
 
-    public boolean validDomainName(String domain)
-    {
+    public boolean validDomainName(String domain) {
         boolean rval = (domain.contains(".") && !domain.contains("..") && !domain.startsWith(".") && !domain.endsWith("."));
 
-        for (int i=0;i<domain.length() && rval;i++)
-        {
+        for (int i = 0; i < domain.length() && rval; i++) {
             char c = domain.charAt(i);
-            rval = Character.isLetterOrDigit(c) || c=='.' || (i==domain.length()-1 && c=='>'); // ok, the last one is pretty kludgy
+            rval = Character.isLetterOrDigit(c) || c == '.' || (i == domain.length() - 1 && c == '>'); // ok, the last one is pretty kludgy
         }
 
-        if (!rval)
-        {
+        if (!rval) {
             LOG.debug("{} is not a valid domain - rejecting", domain);
         }
 
@@ -119,13 +105,10 @@ public class EmailStringFinder implements IStringFinder {
     }
 
 
-
-    private int findNextWhitespaceOrEnd(String input, int startFrom, int step)
-    {
+    private int findNextWhitespaceOrEnd(String input, int startFrom, int step) {
         int rval = startFrom;
-        while (input!=null && rval<input.length() && rval>0 && !Character.isWhitespace(input.charAt(rval)))
-        {
-            rval +=step ;
+        while (input != null && rval < input.length() && rval > 0 && !Character.isWhitespace(input.charAt(rval))) {
+            rval += step;
         }
         return rval;
     }

@@ -1,8 +1,5 @@
 package com.erigir.lucid.swing;
 
-import com.erigir.lucid.swing.About;
-import com.erigir.lucid.swing.TestLuceneAction;
-import com.erigir.lucid.swing.ViewLogFileAction;
 import org.springframework.beans.factory.InitializingBean;
 
 import javax.swing.*;
@@ -40,13 +37,13 @@ public class MainMenuBar extends JMenuBar implements InitializingBean {
 
         add(file);
 
-            JMenu admin = new JMenu("Admin");
+        JMenu admin = new JMenu("Admin");
 
-            admin.add(viewLogFileMenuItem);
+        admin.add(viewLogFileMenuItem);
         admin.add(testLuceneMenuItem);
-            admin.add(new JSeparator());
+        admin.add(new JSeparator());
 
-            add(admin);
+        add(admin);
 
 
         JMenu help = new JMenu("Help");

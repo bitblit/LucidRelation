@@ -17,7 +17,6 @@ public class MatchLocation {
     }
 
 
-
     public int getStart() {
         return start;
     }
@@ -34,8 +33,7 @@ public class MatchLocation {
         this.end = end;
     }
 
-    public String toString()
-    {
+    public String toString() {
         return ToStringBuilder.reflectionToString(this);
     }
 

@@ -1,10 +1,6 @@
 package com.erigir.lucid.swing;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.Graphics2D;
-import java.awt.SplashScreen;
+import java.awt.*;
 import java.awt.geom.Rectangle2D;
 
 /**
@@ -21,24 +17,22 @@ public class SplashScreenHandler {
     /**
      * Prepare the global variables for the other splash functions
      */
-    static
-    {
+    static {
         // the splash screen object is created by the JVM, if it is displaying a splash image
 
         mySplash = SplashScreen.getSplashScreen();
         // if there are any problems displaying the splash image
         // the call to getSplashScreen will returned null
 
-        if (mySplash != null)
-        {
+        if (mySplash != null) {
             // get the size of the image now being displayed
             Dimension ssDim = mySplash.getSize();
             int height = ssDim.height;
             int width = ssDim.width;
 
             // stake out some area for our status information
-            splashTextArea = new Rectangle2D.Double(15., height*0.88, width * .45, 32.);
-            splashProgressArea = new Rectangle2D.Double(width * .55, height*.92, width*.4, 12 );
+            splashTextArea = new Rectangle2D.Double(15., height * 0.88, width * .45, 32.);
+            splashProgressArea = new Rectangle2D.Double(width * .55, height * .92, width * .4, 12);
 
             // create the Graphics environment for drawing status info
             splashGraphics = mySplash.createGraphics();
@@ -51,14 +45,12 @@ public class SplashScreenHandler {
         }
     }
 
-    public static void closeSplash()
-    {
+    public static void closeSplash() {
         if (mySplash != null)   // check if we really had a spash screen
             mySplash.close();   // we're done with it
     }
 
-    public static void splashUpdate(String text, int pct)
-    {
+    public static void splashUpdate(String text, int pct) {
         splashText(text);
         splashProgress(pct);
     }
@@ -66,12 +58,11 @@ public class SplashScreenHandler {
 
     /**
      * Display text in status area of Splash.  Note: no validation it will fit.
+     *
      * @param str - text to be displayed
      */
-    public static void splashText(String str)
-    {
-        if (mySplash != null && mySplash.isVisible())
-        {   // important to check here so no other methods need to know if there
+    public static void splashText(String str) {
+        if (mySplash != null && mySplash.isVisible()) {   // important to check here so no other methods need to know if there
             // really is a Splash being displayed
 
             // erase the last status text
@@ -80,20 +71,20 @@ public class SplashScreenHandler {
 
             // draw the text
             splashGraphics.setPaint(Color.BLACK);
-            splashGraphics.drawString(str, (int)(splashTextArea.getX() + 10),(int)(splashTextArea.getY() + 15));
+            splashGraphics.drawString(str, (int) (splashTextArea.getX() + 10), (int) (splashTextArea.getY() + 15));
 
             // make sure it's displayed
             mySplash.update();
         }
     }
+
     /**
      * Display a (very) basic progress bar
+     *
      * @param pct how much of the progress bar to display 0-100
      */
-    public static void splashProgress(int pct)
-    {
-        if (mySplash != null && mySplash.isVisible())
-        {
+    public static void splashProgress(int pct) {
+        if (mySplash != null && mySplash.isVisible()) {
 
             // Note: 3 colors are used here to demonstrate steps
             // erase the old one
@@ -110,12 +101,12 @@ public class SplashScreenHandler {
             int wid = (int) splashProgressArea.getWidth();
             int hgt = (int) splashProgressArea.getHeight();
 
-            int doneWidth = Math.round(pct*wid/100.f);
-            doneWidth = Math.max(0, Math.min(doneWidth, wid-1));  // limit 0-width
+            int doneWidth = Math.round(pct * wid / 100.f);
+            doneWidth = Math.max(0, Math.min(doneWidth, wid - 1));  // limit 0-width
 
             // fill the done part one pixel smaller than the outline
             splashGraphics.setPaint(Color.GREEN);
-            splashGraphics.fillRect(x, y+1, doneWidth, hgt-1);
+            splashGraphics.fillRect(x, y + 1, doneWidth, hgt - 1);
 
             // make sure it's displayed
             mySplash.update();

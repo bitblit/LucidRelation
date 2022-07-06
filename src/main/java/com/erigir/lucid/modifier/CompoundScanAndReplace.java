@@ -20,10 +20,8 @@ public class CompoundScanAndReplace implements IScanAndReplace {
     @Override
     public String performScanAndReplace(String value) {
         String rval = value;
-        if (rval!=null && scanList!=null)
-        {
-            for (SingleScanAndReplace s:scanList)
-            {
+        if (rval != null && scanList != null) {
+            for (SingleScanAndReplace s : scanList) {
                 rval = s.performScanAndReplace(rval);
             }
         }

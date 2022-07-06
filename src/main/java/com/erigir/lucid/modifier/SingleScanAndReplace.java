@@ -40,30 +40,25 @@ public class SingleScanAndReplace implements IScanAndReplace {
     }
 
     @Override
-    public String performScanAndReplace(String value)
-    {
+    public String performScanAndReplace(String value) {
         String rval = value;
 
-        if (value!=null)
-        {
+        if (value != null) {
             String work = value;
             StringBuilder sb = new StringBuilder();
 
             MatchLocation next = finder.find(work);
-            while (next!=null)
-            {
-                if (!matchLocationValid(work, next))
-                {
+            while (next != null) {
+                if (!matchLocationValid(work, next)) {
                     throw new IllegalStateException("Bad match location");
                 }
                 sb.append(work.substring(0, next.getStart()));
                 sb.append(modifier.modify(work.substring(next.getStart(), next.getEnd())));
-                work = (next.getEnd()==work.length())?"":work.substring(next.getEnd());
+                work = (next.getEnd() == work.length()) ? "" : work.substring(next.getEnd());
                 next = finder.find(work);
             }
 
-            if (work.length()>0)
-            {
+            if (work.length() > 0) {
                 sb.append(work); // the remainder
             }
             rval = sb.toString();
@@ -72,14 +67,11 @@ public class SingleScanAndReplace implements IScanAndReplace {
         return rval;
     }
 
-    private boolean matchLocationValid(String string, MatchLocation match)
-    {
+    private boolean matchLocationValid(String string, MatchLocation match) {
         boolean rval = true;
-        if (string!=null && match!=null)
-        {
-            rval = match.getStart()>=0 && match.getEnd()<=string.length();
-            if (!rval)
-            {
+        if (string != null && match != null) {
+            rval = match.getStart() >= 0 && match.getEnd() <= string.length();
+            if (!rval) {
                 LOG.warn("Warning - invalid match found from finder {} against string '{}' - was {}", new Object[]{finder.getClass(), string, match});
             }
         }

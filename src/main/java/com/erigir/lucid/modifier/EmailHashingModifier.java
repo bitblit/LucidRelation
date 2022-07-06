@@ -1,8 +1,6 @@
 package com.erigir.lucid.modifier;
 
 
-import org.apache.commons.codec.digest.DigestUtils;
-
 /**
  * Defaults to just salted hashing the match
  * Created with IntelliJ IDEA.
@@ -18,19 +16,17 @@ public class EmailHashingModifier extends SaltedHashingModifier {
     }
 
     public EmailHashingModifier(String salt, boolean domainMaintained) {
-        super(salt,null);
+        super(salt, null);
         this.domainMaintained = domainMaintained;
     }
 
     @Override
     public String modify(String body) {
         String rval = super.modify(body);
-        if (domainMaintained && body!=null)
-        {
+        if (domainMaintained && body != null) {
             int idx = body.indexOf("@");
-            if (idx>-1)
-            {
-                rval = super.modify(body.substring(0,idx))+body.substring(idx);
+            if (idx > -1) {
+                rval = super.modify(body.substring(0, idx)) + body.substring(idx);
             }
         }
         return rval;

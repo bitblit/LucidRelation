@@ -41,12 +41,11 @@ public class SaltedHashingModifier implements IStringModifier {
 
     @Override
     public String modify(String body) {
-        if (salt==null)
-        {
+        if (salt == null) {
             throw new IllegalArgumentException("Salt cannot be null");
         }
         String hash = DigestUtils.shaHex((salt + body).getBytes());
-        return (prefix==null)?hash:prefix+hash;
+        return (prefix == null) ? hash : prefix + hash;
     }
 
 

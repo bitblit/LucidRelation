@@ -1,8 +1,6 @@
 package com.erigir.lucid;
 
-import org.codehaus.jackson.map.DeserializationConfig;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.SerializationConfig;
+import com.fasterxml.jackson.databind.*;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.FactoryBean;
 
@@ -25,9 +23,9 @@ public class ObjectMapperFactory implements FactoryBean<ObjectMapper> {
     @Override
     public ObjectMapper getObject() throws BeansException {
         ObjectMapper rval = new ObjectMapper();
-        rval.configure(SerializationConfig.Feature.INDENT_OUTPUT, true);
-        rval.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        rval.configure(SerializationConfig.Feature.WRITE_DATES_AS_TIMESTAMPS, true);
+        rval.configure(SerializationFeature.INDENT_OUTPUT, true);
+        rval.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        rval.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, true);
 
         return rval;
     }

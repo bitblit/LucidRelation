@@ -16,9 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Map;
-import java.util.Properties;
 import java.util.TreeMap;
 
 /**
@@ -26,22 +24,21 @@ import java.util.TreeMap;
  * Date: 12/4/13
  * Time: 1:38 PM
  */
-public class EmailBodyCustomFieldProcessor implements ICustomFieldProcessor{
+public class EmailBodyCustomFieldProcessor implements ICustomFieldProcessor {
     private static final Logger LOG = LoggerFactory.getLogger(EmailBodyCustomFieldProcessor.class);
-    public static final String TEXT_BODY_NAME="emailTextBody";
-    public static final String HTML_BODY_NAME="emailHtmlBody";
-    public static final String HEADER_PREFIX="emailHeader_";
+    public static final String TEXT_BODY_NAME = "emailTextBody";
+    public static final String HTML_BODY_NAME = "emailHtmlBody";
+    public static final String HEADER_PREFIX = "emailHeader_";
 
     private IScanAndReplace postProcessor;
 
 
     @Override
-    public Map<String,Class> process(String fieldName, Object fieldValue, Document lDoc) {
+    public Map<String, Class> process(String fieldName, Object fieldValue, Document lDoc) {
         LOG.debug("Processing field {} (class {}) as an email body", new Object[]{fieldName, fieldName.getClass()});
-        Map<String,Class> addField = new TreeMap<String, Class>();
+        Map<String, Class> addField = new TreeMap<String, Class>();
 
-        try
-        {
+        try {
             ByteArrayInputStream inputData = new ByteArrayInputStream(String.valueOf(fieldValue).getBytes());
 
             MimeTokenStream stream = new MimeTokenStream();
@@ -52,58 +49,40 @@ public class EmailBodyCustomFieldProcessor implements ICustomFieldProcessor{
                 switch (state) {
                     case T_BODY:
                         BodyDescriptor bd = stream.getBodyDescriptor();
-                        if ("text".equalsIgnoreCase(bd.getMediaType()))
-                        {
+                        if ("text".equalsIgnoreCase(bd.getMediaType())) {
                             String value = IOUtils.toString(stream.getInputStream());
-                            if (bd.getTransferEncoding()!=null)
-                            {
-                                if ("base64".equalsIgnoreCase(bd.getTransferEncoding()))
-                                {
+                            if (bd.getTransferEncoding() != null) {
+                                if ("base64".equalsIgnoreCase(bd.getTransferEncoding())) {
                                     value = new String(Base64.decodeBase64(value.getBytes()));
-                                }
-                                else if ("7bit".equalsIgnoreCase(bd.getTransferEncoding()))
-                                {
-                                    LOG.debug("Using 7bit encoding straight : {}",value.length());
-                                }
-                                else if ("8bit".equalsIgnoreCase(bd.getTransferEncoding()))
-                                {
-                                    LOG.debug("Using 8bit encoding straight : {}",value.length());
-                                }
-                                else if ("quoted-printable".equalsIgnoreCase(bd.getTransferEncoding()))
-                                {
-                                    LOG.debug("Using quoted-printable encoding straight : {}",value.length());
-                                }
-                                else
-                                {
+                                } else if ("7bit".equalsIgnoreCase(bd.getTransferEncoding())) {
+                                    LOG.debug("Using 7bit encoding straight : {}", value.length());
+                                } else if ("8bit".equalsIgnoreCase(bd.getTransferEncoding())) {
+                                    LOG.debug("Using 8bit encoding straight : {}", value.length());
+                                } else if ("quoted-printable".equalsIgnoreCase(bd.getTransferEncoding())) {
+                                    LOG.debug("Using quoted-printable encoding straight : {}", value.length());
+                                } else {
                                     LOG.warn("unknown xfer enc : {}", bd.getTransferEncoding());
                                 }
                             }
 
-                            if ("plain".equalsIgnoreCase(bd.getSubType()))
-                            {
+                            if ("plain".equalsIgnoreCase(bd.getSubType())) {
                                 LOG.info("Setting email text body");
                                 lDoc.add(new TextField(TEXT_BODY_NAME, postProcess(value), Field.Store.YES));
                                 addField.put(TEXT_BODY_NAME, String.class);
-                            }
-                            else if ("html".equalsIgnoreCase(bd.getSubType()))
-                            {
+                            } else if ("html".equalsIgnoreCase(bd.getSubType())) {
                                 LOG.info("Setting email html body");
                                 lDoc.add(new TextField(HTML_BODY_NAME, postProcess(value), Field.Store.YES));
                                 addField.put(HTML_BODY_NAME, String.class);
+                            } else {
+                                LOG.debug("non plain or html text found : {}", bd.getSubType());
                             }
-                            else
-                            {
-                                LOG.debug("non plain or html text found : {}",bd.getSubType());
-                            }
-                        }
-                        else
-                        {
+                        } else {
                             LOG.warn("Non-text body part found : {}", bd);
                         }
                         break;
                     case T_FIELD:
                         org.apache.james.mime4j.stream.Field f = stream.getField();
-                        String recName = HEADER_PREFIX+f.getName();
+                        String recName = HEADER_PREFIX + f.getName();
 
                         lDoc.add(new StringField(recName, postProcess(f.getBody()), Field.Store.YES));
                         addField.put(recName, String.class);
@@ -118,22 +97,17 @@ public class EmailBodyCustomFieldProcessor implements ICustomFieldProcessor{
             }
 
 
-        }
-        catch (IOException ioe)
-        {
-            LOG.warn("Error processing",ioe);
-        }
-        catch (MimeException me)
-        {
-            LOG.warn("Error processing",me);
+        } catch (IOException ioe) {
+            LOG.warn("Error processing", ioe);
+        } catch (MimeException me) {
+            LOG.warn("Error processing", me);
         }
 
         return addField;
     }
 
-    private String postProcess(String input)
-    {
-        return (input==null || postProcessor==null)?input:postProcessor.performScanAndReplace(input);
+    private String postProcess(String input) {
+        return (input == null || postProcessor == null) ? input : postProcessor.performScanAndReplace(input);
     }
 
     public void setPostProcessor(IScanAndReplace postProcessor) {

@@ -36,7 +36,7 @@ public class LucidRelationSwing {
     }
 
     public void run() {
-        SplashScreenHandler.splashUpdate("Creating spring context",50);
+        SplashScreenHandler.splashUpdate("Creating spring context", 50);
         // Bootstrap the spring context
         context = new ClassPathXmlApplicationContext(SPRING_FILES);
 
@@ -45,18 +45,18 @@ public class LucidRelationSwing {
         SplashScreenHandler.closeSplash();
 
         LucidRelationMainFrame frame = (LucidRelationMainFrame) context.getBean("clientMainFrame");
-           frame.setVisible(true);
-           frame.addWindowListener(new WindowAdapter() {
-               @Override
-               public void windowClosing(WindowEvent windowEvent) {
-                   LOG.info("Firing the window closing handler!");
-                   // Do any cleanup needed here
-               }
+        frame.setVisible(true);
+        frame.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent windowEvent) {
+                LOG.info("Firing the window closing handler!");
+                // Do any cleanup needed here
+            }
 
-               @Override
-               public void windowOpened(WindowEvent windowEvent) {
-               }
-           });
+            @Override
+            public void windowOpened(WindowEvent windowEvent) {
+            }
+        });
     }
 
 

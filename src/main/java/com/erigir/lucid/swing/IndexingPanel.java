@@ -42,7 +42,7 @@ public class IndexingPanel extends JPanel implements InitializingBean, RowProces
     @Override
     public void afterPropertiesSet() throws Exception {
         JPanel databasePanel = new JPanel();
-        databasePanel.setLayout(new GridLayout(0,2));
+        databasePanel.setLayout(new GridLayout(0, 2));
         databasePanel.add(new JLabel("Driver Class"));
         databasePanel.add(driver);
         databasePanel.add(new JLabel("URL"));
@@ -54,7 +54,7 @@ public class IndexingPanel extends JPanel implements InitializingBean, RowProces
         databasePanel.add(new JLabel("Salt"));
         databasePanel.add(salt);
 
-        JPanel queryPanel = new JPanel(new GridLayout(0,2));
+        JPanel queryPanel = new JPanel(new GridLayout(0, 2));
         queryPanel.add(new JLabel("Id Column Name"));
         queryPanel.add(idColumnName);
 
@@ -72,7 +72,7 @@ public class IndexingPanel extends JPanel implements InitializingBean, RowProces
         JScrollPane scrollPane = new JScrollPane(query);
         queryPanel.add(scrollPane);
 
-        JPanel processPanel = new JPanel(new GridLayout(0,2));
+        JPanel processPanel = new JPanel(new GridLayout(0, 2));
         processPanel.add(processingMessage);
         processPanel.add(runProcess);
 
@@ -90,54 +90,45 @@ public class IndexingPanel extends JPanel implements InitializingBean, RowProces
         });
 
         // See if we can preload from properties file
-        File pre = new File(System.getProperty("user.home")+File.separator+".lucid-pre-properties");
-        if (pre.exists() && pre.isFile())
-        {
+        File pre = new File(System.getProperty("user.home") + File.separator + ".lucid-pre-properties");
+        if (pre.exists() && pre.isFile()) {
             LOG.info("Preloading from properties");
-            Properties props= new Properties();
+            Properties props = new Properties();
             props.load(new FileInputStream(pre));
 
-            url.setText((props.getProperty("url")==null)?url.getText():props.getProperty("url"));
-            driver.setText((props.getProperty("driver")==null)?driver.getText():props.getProperty("driver"));
-            username.setText((props.getProperty("username")==null)?username.getText():props.getProperty("username"));
-            password.setText((props.getProperty("password")==null)?password.getText():props.getProperty("password"));
-            query.setText((props.getProperty("query")==null)?query.getText():props.getProperty("query"));
-            targetDirectory.setText((props.getProperty("targetDirectory")==null)?targetDirectory.getText():props.getProperty("targetDirectory"));
-            salt.setText((props.getProperty("salt")==null)?salt.getText():props.getProperty("salt"));
-            customProcessors.setText((props.getProperty("customProcessors")==null)?customProcessors.getText():props.getProperty("customProcessors"));
+            url.setText((props.getProperty("url") == null) ? url.getText() : props.getProperty("url"));
+            driver.setText((props.getProperty("driver") == null) ? driver.getText() : props.getProperty("driver"));
+            username.setText((props.getProperty("username") == null) ? username.getText() : props.getProperty("username"));
+            password.setText((props.getProperty("password") == null) ? password.getText() : props.getProperty("password"));
+            query.setText((props.getProperty("query") == null) ? query.getText() : props.getProperty("query"));
+            targetDirectory.setText((props.getProperty("targetDirectory") == null) ? targetDirectory.getText() : props.getProperty("targetDirectory"));
+            salt.setText((props.getProperty("salt") == null) ? salt.getText() : props.getProperty("salt"));
+            customProcessors.setText((props.getProperty("customProcessors") == null) ? customProcessors.getText() : props.getProperty("customProcessors"));
         }
 
     }
 
-    public Map<String, ICustomFieldProcessor> createCustomProcessorMap()
-    {
+    public Map<String, ICustomFieldProcessor> createCustomProcessorMap() {
         Map<String, ICustomFieldProcessor> rval = new TreeMap<String, ICustomFieldProcessor>();
-        try
-        {
-            if (StringUtils.trimToNull(customProcessors.getText())!=null)
-            {
+        try {
+            if (StringUtils.trimToNull(customProcessors.getText()) != null) {
                 Properties p = new Properties();
                 p.load(new StringReader(customProcessors.getText()));
 
-                for (Map.Entry<Object,Object> e:p.entrySet())
-                {
-                    String name = (String)e.getKey();
-                    Class c = Class.forName((String)e.getValue());
-                    rval.put(name, (ICustomFieldProcessor)c.newInstance());
+                for (Map.Entry<Object, Object> e : p.entrySet()) {
+                    String name = (String) e.getKey();
+                    Class c = Class.forName((String) e.getValue());
+                    rval.put(name, (ICustomFieldProcessor) c.newInstance());
                 }
             }
-        }
-        catch (Exception e)
-        {
-            JOptionPane.showMessageDialog(null,"Error processing customer processor:"+e);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "Error processing customer processor:" + e);
         }
         return rval;
     }
 
 
-
-    public void processQuery()
-    {
+    public void processQuery() {
         DatabaseIndexer di = new DatabaseIndexer();
         di.setTargetDirectory(new File(targetDirectory.getText()));
         di.setDriver(driver.getText());

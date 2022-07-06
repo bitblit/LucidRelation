@@ -2,13 +2,9 @@ package com.erigir.lucid.swing;
 
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexableField;
-import org.apache.lucene.search.IndexSearcher;
-import org.apache.lucene.search.ScoreDoc;
 
 import javax.swing.table.AbstractTableModel;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -20,11 +16,10 @@ import java.util.Map;
 public class QueryResultsTableModel extends AbstractTableModel {
 
     private List<Document> docs;
-    private Map<String,String> fields;
+    private Map<String, String> fields;
     private List<String> fieldList;
 
-    public QueryResultsTableModel(List<Document> docs, Map<String,String> fields)
-    {
+    public QueryResultsTableModel(List<Document> docs, Map<String, String> fields) {
         super();
         this.docs = docs;
         this.fields = fields;
@@ -44,11 +39,11 @@ public class QueryResultsTableModel extends AbstractTableModel {
 
     @Override
     public Object getValueAt(int i, int i2) {
-            Document doc = docs.get(i);
+        Document doc = docs.get(i);
 
-                String fieldName = fieldList.get(i2 );
-                IndexableField f = doc.getField(fieldName);
-                return (f==null)?null:f.stringValue();
+        String fieldName = fieldList.get(i2);
+        IndexableField f = doc.getField(fieldName);
+        return (f == null) ? null : f.stringValue();
     }
 
     @Override

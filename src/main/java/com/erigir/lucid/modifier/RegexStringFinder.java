@@ -29,11 +29,9 @@ public class RegexStringFinder implements IStringFinder {
     public MatchLocation find(String body) {
         MatchLocation rval = null;
 
-        if (body!=null)
-        {
+        if (body != null) {
             Matcher matcher = regex.matcher(body);
-            if (matcher.find())
-            {
+            if (matcher.find()) {
                 rval = new MatchLocation(matcher.start(), matcher.end());
             }
         }
@@ -41,8 +39,7 @@ public class RegexStringFinder implements IStringFinder {
         return rval;
     }
 
-    public void setRegex(String regex)
-    {
+    public void setRegex(String regex) {
         this.regex = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
     }
 

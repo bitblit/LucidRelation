@@ -30,95 +30,77 @@ public class DatabaseIndexer implements Runnable {
     private List<RowProcessingListener> listeners = new LinkedList<RowProcessingListener>();
     private Map<String, ICustomFieldProcessor> customProcessors = new TreeMap<String, ICustomFieldProcessor>();
 
-    public LuceneIndexingRowCallbackHandler createHandler()
-    {
+    public LuceneIndexingRowCallbackHandler createHandler() {
         LuceneIndexingRowCallbackHandler handle = new LuceneIndexingRowCallbackHandler();
         IScanAndReplace postProcessor = createPostProcessor();
         handle.setDirectory(targetDirectory);
         handle.setListeners(listeners);
         handle.setPostProcessor(postProcessor);
         handle.setCustomProcessors(customProcessors);
-        for (ICustomFieldProcessor i:customProcessors.values())
-        {
+        for (ICustomFieldProcessor i : customProcessors.values()) {
             i.setPostProcessor(postProcessor);
         }
         return handle;
     }
 
-    private IScanAndReplace createPostProcessor()
-    {
+    private IScanAndReplace createPostProcessor() {
         IScanAndReplace rval = null;
-        if (true)
-        {
+        if (true) {
             AtomicLong counter = new AtomicLong(0);
             List<SingleScanAndReplace> mods = Arrays.asList(
-            new SingleScanAndReplace(RegexStringFinder.SSN_FINDER, new SaltedHashingModifier(salt,"SSN:"))//  new CountingStringModifier("SSN:",counter))
-            ,new SingleScanAndReplace(RegexStringFinder.CREDIT_CARD_FINDER, new SaltedHashingModifier(salt,"CCARD:")) //new CountingStringModifier("CCARD:",counter))
-            ,new SingleScanAndReplace(new EmailStringFinder(), new SaltedHashingModifier(salt,"EMAIL:")));//new CountingStringModifier("EMAIL:",counter)));
+                    new SingleScanAndReplace(RegexStringFinder.SSN_FINDER, new SaltedHashingModifier(salt, "SSN:"))//  new CountingStringModifier("SSN:",counter))
+                    , new SingleScanAndReplace(RegexStringFinder.CREDIT_CARD_FINDER, new SaltedHashingModifier(salt, "CCARD:")) //new CountingStringModifier("CCARD:",counter))
+                    , new SingleScanAndReplace(new EmailStringFinder(), new SaltedHashingModifier(salt, "EMAIL:")));//new CountingStringModifier("EMAIL:",counter)));
 
-            rval= new CompoundScanAndReplace(mods);
-        }
-        else
-        {
+            rval = new CompoundScanAndReplace(mods);
+        } else {
             LOG.info("Not creating modifier");
         }
         return rval;
     }
 
 
-
-    public void run()
-    {
+    public void run() {
         StopWatch sw = new StopWatch();
         sw.start();
         LuceneIndexingRowCallbackHandler handler = createHandler();
-        BoneCPDataSource ds=null;
-        Connection connection=null;
+        BoneCPDataSource ds = null;
+        Connection connection = null;
 
-        try
-        {
-            Class.forName(driver); 	// load the DB driver
-             ds = new BoneCPDataSource();  // create a new datasource object
-            ds.setJdbcUrl(url);	// set the JDBC url
-            ds.setUsername(username);			// set the username
-            ds.setPassword(password);				// set the password
-        	//ds.setXXXX(...);				// (other config options here)
-        	connection = ds.getConnection(); 	// fetch a connection
+        try {
+            Class.forName(driver);    // load the DB driver
+            ds = new BoneCPDataSource();  // create a new datasource object
+            ds.setJdbcUrl(url);    // set the JDBC url
+            ds.setUsername(username);            // set the username
+            ds.setPassword(password);                // set the password
+            //ds.setXXXX(...);				// (other config options here)
+            connection = ds.getConnection();    // fetch a connection
 
             LOG.info("Connected to db - processing query");
             JdbcTemplate template = new JdbcTemplate(ds);
             template.query(query, handler);
             LOG.info("Query processed.  closing");
 
-        	connection.close();				// close the connection
-        	ds.close();			// close the connection pool
+            connection.close();                // close the connection
+            ds.close();            // close the connection pool
             handler.finish();
 
-        }
-        catch (Exception e)
-        {
-            throw new IllegalStateException("Error opening connection",e);
-        }
-        finally
-        {
-            if (connection!=null)
-            {
-                try
-                {
+        } catch (Exception e) {
+            throw new IllegalStateException("Error opening connection", e);
+        } finally {
+            if (connection != null) {
+                try {
                     connection.close();
-                }
-                catch (SQLException se)
-                {
-                    throw new IllegalStateException("Ugh.  Couldn't even close connection right : ",se);
+                } catch (SQLException se) {
+                    throw new IllegalStateException("Ugh.  Couldn't even close connection right : ", se);
                 }
             }
-            if (ds!=null)
-            {
+            if (ds != null) {
                 ds.close();
             }
 
             sw.stop();
-            RowProcessedEvent.updateListeners(listeners, handler.getRowCount(), "Finished in "+sw);
+            RowProcessedEvent.updateListeners(listeners, handler.getRowCount(), "Finished in " + sw);
         }
     }
 
@@ -146,8 +128,7 @@ public class DatabaseIndexer implements Runnable {
         this.targetDirectory = targetDirectory;
     }
 
-    public void addListener(RowProcessingListener listener)
-    {
+    public void addListener(RowProcessingListener listener) {
         listeners.add(listener);
     }
 

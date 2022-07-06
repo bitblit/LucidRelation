@@ -12,39 +12,32 @@ import java.util.Properties;
  * Date: 12/2/13
  * Time: 5:48 PM
  */
-public class LucidRelationCLI implements RowProcessingListener{
+public class LucidRelationCLI implements RowProcessingListener {
     private static final Logger LOG = LoggerFactory.getLogger(LucidRelationCLI.class);
-    private static final int LOG_MOD=1000;
+    private static final int LOG_MOD = 1000;
     private DatabaseIndexer databaseIndexer;
 
     public static void main(String[] args) {
-        try
-        {
+        try {
             // See if we can preload from properties file
-            File pre = new File(System.getProperty("user.home")+File.separator+".lucid-pre-properties");
-            if (pre.exists() && pre.isFile())
-            {
+            File pre = new File(System.getProperty("user.home") + File.separator + ".lucid-pre-properties");
+            if (pre.exists() && pre.isFile()) {
                 LOG.info("Preloading from properties");
-                Properties props= new Properties();
+                Properties props = new Properties();
                 props.load(new FileInputStream(pre));
 
                 LucidRelationCLI l = new LucidRelationCLI(props);
                 l.run();
                 System.exit(0);
-            }
-            else
-            {
+            } else {
                 LOG.info("Cant start - couldnt find .lucid-pre-properties");
             }
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public LucidRelationCLI(Properties props)
-    {
+    public LucidRelationCLI(Properties props) {
         databaseIndexer = new DatabaseIndexer();
         databaseIndexer.setSalt(props.getProperty("salt"));
         databaseIndexer.setUrl(props.getProperty("url"));
@@ -56,16 +49,14 @@ public class LucidRelationCLI implements RowProcessingListener{
         databaseIndexer.addListener(this);
     }
 
-    public void run()
-    {
+    public void run() {
         databaseIndexer.run();
     }
 
     @Override
     public void rowProcessed(RowProcessedEvent evt) {
-        if ((evt.getRow()%LOG_MOD)==0)
-        {
-            LOG.info("Row : {} : {}",evt.getRow(), evt.getMessage());
+        if ((evt.getRow() % LOG_MOD) == 0) {
+            LOG.info("Row : {} : {}", evt.getRow(), evt.getMessage());
         }
     }
 }

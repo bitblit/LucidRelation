@@ -28,12 +28,10 @@ public class RowProcessedEvent {
         return message;
     }
 
-    public static void updateListeners(Collection<RowProcessingListener> listeners, int row,String message)
-    {
-        LOG.trace("Publishing {} to {} listeners",row, listeners.size());
+    public static void updateListeners(Collection<RowProcessingListener> listeners, int row, String message) {
+        LOG.trace("Publishing {} to {} listeners", row, listeners.size());
         RowProcessedEvent e = new RowProcessedEvent(row, message);
-        for (RowProcessingListener l:listeners)
-        {
+        for (RowProcessingListener l : listeners) {
             l.rowProcessed(e);
         }
     }

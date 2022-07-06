@@ -1,32 +1,23 @@
 package com.erigir.lucid.swing;
 
 import com.erigir.lucid.LuceneIndexingRowCallbackHandler;
-import com.jolbox.bonecp.BoneCPDataSource;
-import org.apache.commons.io.IOUtils;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
-import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriterConfig;
-import org.apache.lucene.index.IndexableField;
 import org.apache.lucene.queryparser.classic.MultiFieldQueryParser;
-import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopScoreDocCollector;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.NIOFSDirectory;
-import org.apache.lucene.store.RAMDirectory;
-import org.apache.lucene.util.Version;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.type.TypeReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowCallbackHandler;
 
 import javax.swing.*;
 import java.awt.*;
@@ -34,8 +25,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileInputStream;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -57,7 +46,7 @@ public class SearchPanel extends JPanel implements InitializingBean {
     @Override
     public void afterPropertiesSet() throws Exception {
 
-        JPanel queryPanel = new JPanel(new GridLayout(0,2));
+        JPanel queryPanel = new JPanel(new GridLayout(0, 2));
 
         queryPanel.add(new JLabel("Target Directory"));
         queryPanel.add(targetDirectory);
@@ -67,7 +56,7 @@ public class SearchPanel extends JPanel implements InitializingBean {
         JScrollPane scrollPane = new JScrollPane(query);
         queryPanel.add(scrollPane);
 
-        outputTable.setPreferredScrollableViewportSize(new Dimension(40000,100));
+        outputTable.setPreferredScrollableViewportSize(new Dimension(40000, 100));
         JScrollPane outputTableScroll = new JScrollPane(outputTable);
         outputTableScroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
         outputTableScroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
@@ -86,29 +75,26 @@ public class SearchPanel extends JPanel implements InitializingBean {
         showFirst.addActionListener(new LuceneAllAction());
 
         // See if we can preload from properties file
-        File pre = new File(System.getProperty("user.home")+File.separator+".lucid-pre-properties");
-        if (pre.exists() && pre.isFile())
-        {
+        File pre = new File(System.getProperty("user.home") + File.separator + ".lucid-pre-properties");
+        if (pre.exists() && pre.isFile()) {
             LOG.info("Preloading from properties");
-            Properties props= new Properties();
+            Properties props = new Properties();
             props.load(new FileInputStream(pre));
 
-            targetDirectory.setText((props.getProperty("targetDirectory")==null)?targetDirectory.getText():props.getProperty("targetDirectory"));
+            targetDirectory.setText((props.getProperty("targetDirectory") == null) ? targetDirectory.getText() : props.getProperty("targetDirectory"));
         }
 
     }
 
-    class LuceneAllAction implements ActionListener
-    {
+    class LuceneAllAction implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
-            try
-            {
-                File directory =   new File(targetDirectory.getText());
+            try {
+                File directory = new File(targetDirectory.getText());
                 // Grab the type data
-                Map<String,String> fieldData = objectMapper.readValue(new FileInputStream(new File(directory, LuceneIndexingRowCallbackHandler.FIELD_METADATA_FILE)), new TypeReference<Map<String, String>>() {
+                Map<String, String> fieldData = objectMapper.readValue(new FileInputStream(new File(directory, LuceneIndexingRowCallbackHandler.FIELD_METADATA_FILE)), new TypeReference<Map<String, String>>() {
                 });
-                LOG.info("Will be searching : {}",fieldData);
+                LOG.info("Will be searching : {}", fieldData);
 
                 StandardAnalyzer analyzer = new StandardAnalyzer();
                 Directory index = new NIOFSDirectory(directory.toPath());
@@ -120,8 +106,7 @@ public class SearchPanel extends JPanel implements InitializingBean {
 
                 List<Document> l = new LinkedList<Document>();
 
-                for (int i=0;i<reader.maxDoc() && l.size()<100;i++)
-                {
+                for (int i = 0; i < reader.maxDoc() && l.size() < 100; i++) {
                     l.add(reader.document(i));
                 }
 
@@ -129,44 +114,40 @@ public class SearchPanel extends JPanel implements InitializingBean {
                 outputTable.setModel(tm);
                 tm.fireTableDataChanged();
 
-            }
-            catch (Exception e)
-            {
-                JOptionPane.showMessageDialog(null,"Error searching"+e);
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(null, "Error searching" + e);
             }
         }
 
     }
 
-    class LuceneQueryAction implements ActionListener
-    {
+    class LuceneQueryAction implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
-            try
-            {
-                File directory =   new File(targetDirectory.getText());
+            try {
+                File directory = new File(targetDirectory.getText());
                 // Grab the type data
-                Map<String,String> fieldData = objectMapper.readValue(new FileInputStream(new File(directory, LuceneIndexingRowCallbackHandler.FIELD_METADATA_FILE)), new TypeReference<Map<String, String>>() {
+                Map<String, String> fieldData = objectMapper.readValue(new FileInputStream(new File(directory, LuceneIndexingRowCallbackHandler.FIELD_METADATA_FILE)), new TypeReference<Map<String, String>>() {
                 });
-                LOG.info("Will be searching : {}",fieldData);
+                LOG.info("Will be searching : {}", fieldData);
 
-        StandardAnalyzer analyzer = new StandardAnalyzer();
-        Directory index = new NIOFSDirectory(directory.toPath());
+                StandardAnalyzer analyzer = new StandardAnalyzer();
+                Directory index = new NIOFSDirectory(directory.toPath());
 
-        IndexWriterConfig config = new IndexWriterConfig(analyzer);
+                IndexWriterConfig config = new IndexWriterConfig(analyzer);
 
                 String querystr = StringUtils.trimToEmpty(query.getText());
 
-             String[] allFieldNames = fieldData.keySet().toArray(new String[0]);
+                String[] allFieldNames = fieldData.keySet().toArray(new String[0]);
 
-             Query q = new MultiFieldQueryParser(allFieldNames , analyzer).parse(querystr);       //LuceneIndexingRowCallbackHandler.ALL_FIELD_NAME
+                Query q = new MultiFieldQueryParser(allFieldNames, analyzer).parse(querystr);       //LuceneIndexingRowCallbackHandler.ALL_FIELD_NAME
 
-             int hitsPerPage = 10;
-             DirectoryReader reader = DirectoryReader.open(index);
-             IndexSearcher searcher = new IndexSearcher(reader);
-             TopScoreDocCollector collector = TopScoreDocCollector.create(hitsPerPage);
-             searcher.search(q, collector);
-             ScoreDoc[] hits = collector.topDocs().scoreDocs;
+                int hitsPerPage = 10;
+                DirectoryReader reader = DirectoryReader.open(index);
+                IndexSearcher searcher = new IndexSearcher(reader);
+                TopScoreDocCollector collector = TopScoreDocCollector.create(hitsPerPage);
+                searcher.search(q, collector);
+                ScoreDoc[] hits = collector.topDocs().scoreDocs;
 
                 /*
              StringBuilder sb = new StringBuilder();
@@ -184,8 +165,7 @@ public class SearchPanel extends JPanel implements InitializingBean {
              */
 
                 List<Document> l = new LinkedList<Document>();
-                for (ScoreDoc s:hits)
-                {
+                for (ScoreDoc s : hits) {
                     l.add(searcher.doc(s.doc));
                 }
 
@@ -194,10 +174,8 @@ public class SearchPanel extends JPanel implements InitializingBean {
                 outputTable.setModel(tm);
                 tm.fireTableDataChanged();
 
-            }
-            catch (Exception e)
-            {
-                JOptionPane.showMessageDialog(null,"Error searching"+e);
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(null, "Error searching" + e);
             }
         }
     }

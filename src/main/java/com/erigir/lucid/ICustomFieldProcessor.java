@@ -16,10 +16,11 @@ public interface ICustomFieldProcessor {
     /**
      * Can add fields to the provided document - should return a map of the field
      * names and types added to the doc
+     *
      * @param fieldName
      * @param fieldValue
      * @param lDoc
      * @return
      */
-    Map<String,Class> process(String fieldName, Object fieldValue, Document lDoc);
+    Map<String, Class> process(String fieldName, Object fieldValue, Document lDoc);
 }

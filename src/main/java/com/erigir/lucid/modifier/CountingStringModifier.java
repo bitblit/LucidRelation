@@ -37,7 +37,7 @@ public class CountingStringModifier implements IStringModifier {
 
     @Override
     public String modify(String match) {
-        return (prefix==null)?String.valueOf(counter.getAndIncrement()):prefix+counter.getAndIncrement();
+        return (prefix == null) ? String.valueOf(counter.getAndIncrement()) : prefix + counter.getAndIncrement();
     }
 
 }
