@@ -6,6 +6,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
+import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.IndexableField;
@@ -109,10 +110,10 @@ public class SearchPanel extends JPanel implements InitializingBean {
                 });
                 LOG.info("Will be searching : {}",fieldData);
 
-                StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_46);
-                Directory index = new NIOFSDirectory(directory);
+                StandardAnalyzer analyzer = new StandardAnalyzer();
+                Directory index = new NIOFSDirectory(directory.toPath());
 
-                IndexReader reader = IndexReader.open(index);
+                DirectoryReader reader = DirectoryReader.open(index);
 
 
                 String[] allFieldNames = fieldData.keySet().toArray(new String[0]);
@@ -149,21 +150,21 @@ public class SearchPanel extends JPanel implements InitializingBean {
                 });
                 LOG.info("Will be searching : {}",fieldData);
 
-        StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_46);
-        Directory index = new NIOFSDirectory(directory);
+        StandardAnalyzer analyzer = new StandardAnalyzer();
+        Directory index = new NIOFSDirectory(directory.toPath());
 
-        IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_46, analyzer);
+        IndexWriterConfig config = new IndexWriterConfig(analyzer);
 
                 String querystr = StringUtils.trimToEmpty(query.getText());
 
              String[] allFieldNames = fieldData.keySet().toArray(new String[0]);
 
-             Query q = new MultiFieldQueryParser(Version.LUCENE_46,allFieldNames , analyzer).parse(querystr);       //LuceneIndexingRowCallbackHandler.ALL_FIELD_NAME
+             Query q = new MultiFieldQueryParser(allFieldNames , analyzer).parse(querystr);       //LuceneIndexingRowCallbackHandler.ALL_FIELD_NAME
 
              int hitsPerPage = 10;
-             IndexReader reader = IndexReader.open(index);
+             DirectoryReader reader = DirectoryReader.open(index);
              IndexSearcher searcher = new IndexSearcher(reader);
-             TopScoreDocCollector collector = TopScoreDocCollector.create(hitsPerPage, true);
+             TopScoreDocCollector collector = TopScoreDocCollector.create(hitsPerPage);
              searcher.search(q, collector);
              ScoreDoc[] hits = collector.topDocs().scoreDocs;
 

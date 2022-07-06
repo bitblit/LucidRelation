@@ -7,6 +7,7 @@ import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.*;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.index.IndexableField;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.NIOFSDirectory;
 import org.apache.lucene.util.Version;
@@ -43,8 +44,8 @@ public class LuceneIndexingRowCallbackHandler implements RowCallbackHandler {
     private List<RowProcessingListener> listeners = new LinkedList<RowProcessingListener>();
     private Map<String,ICustomFieldProcessor> customProcessors = new TreeMap<String, ICustomFieldProcessor>();
 
-    private StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_46);
-    private IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_46, analyzer);
+    private StandardAnalyzer analyzer = new StandardAnalyzer();
+    private IndexWriterConfig config = new IndexWriterConfig(analyzer);
     private Directory index;
     private IndexWriter writer;
 
@@ -77,22 +78,22 @@ public class LuceneIndexingRowCallbackHandler implements RowCallbackHandler {
                 else if (Double.class.isAssignableFrom(valClazz))
                 {
                     LOG.trace("Storing Double field {} = {}", name, value);
-                    doc.add(new DoubleField(name,(Double)value, Field.Store.YES));
+                    doc.add(new DoublePoint(name,(Double)value));
                 }
                 else if (Long.class.isAssignableFrom(valClazz))
                 {
                     LOG.trace("Storing Long field {} = {}", name,value);
-                    doc.add(new LongField(name,(Long)value, Field.Store.YES));
+                    doc.add(new LongPoint(name,(Long)value));
                 }
                 else if (Integer.class.isAssignableFrom(valClazz))
                 {
                     LOG.trace("Storing Int field {} = {}", name,value);
-                    doc.add(new IntField(name,(Integer)value, Field.Store.YES));
+                    doc.add(new IntPoint(name,(Integer)value));
                 }
                 else if (Float.class.isAssignableFrom(valClazz))
                 {
                     LOG.trace("Storing Float field {} = {}", name,value);
-                    doc.add(new FloatField(name,(Float)value, Field.Store.YES));
+                    doc.add(new FloatPoint(name,(Float)value));
                 }
                 else if (Date.class.isAssignableFrom(valClazz))
                 {
@@ -177,7 +178,7 @@ public class LuceneIndexingRowCallbackHandler implements RowCallbackHandler {
 
             try
             {
-                index = new NIOFSDirectory(directory);
+                index = new NIOFSDirectory(directory.toPath());
                 writer = new IndexWriter(index, config);
             }
             catch (IOException ioe)

@@ -5,6 +5,7 @@ import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
+import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
@@ -27,10 +28,10 @@ import java.io.IOException;
  */
 public class TestLuceneAction implements ActionListener {
         // Create a sample in-memory db
-        StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_46);
+        StandardAnalyzer analyzer = new StandardAnalyzer();
         Directory index = new RAMDirectory();
 
-        IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_46, analyzer);
+        IndexWriterConfig config = new IndexWriterConfig(analyzer);
 
 
     public TestLuceneAction()
@@ -56,12 +57,12 @@ public class TestLuceneAction implements ActionListener {
         {
         String querystr = JOptionPane.showInputDialog(null,"Enter a query");
         querystr = (querystr==null || querystr.trim().length()==0) ? "lucene" : querystr;
-        Query q = new QueryParser(Version.LUCENE_46, "title", analyzer).parse(querystr);
+        Query q = new QueryParser("title", analyzer).parse(querystr);
 
         int hitsPerPage = 10;
-        IndexReader reader = IndexReader.open(index);
+        DirectoryReader reader = DirectoryReader.open(index);
         IndexSearcher searcher = new IndexSearcher(reader);
-        TopScoreDocCollector collector = TopScoreDocCollector.create(hitsPerPage, true);
+        TopScoreDocCollector collector = TopScoreDocCollector.create(hitsPerPage);
         searcher.search(q, collector);
         ScoreDoc[] hits = collector.topDocs().scoreDocs;
 
