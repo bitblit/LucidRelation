@@ -146,7 +146,7 @@
         <dependency>
             <groupId>org.apache.james</groupId>
             <artifactId>apache-mime4j</artifactId>
-            <version>0.8.7</version>
+            <version>0.8.9</version>
             <type>pom</type>
         </dependency>
 
@@ -158,7 +158,7 @@
     <!-- Specify hard-coded project properties here -->
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <jackson.version>2.13.4.1</jackson.version>
+        <jackson.version>2.14.2</jackson.version>
         <spring.version>5.3.21</spring.version>
         <lucene.version>7.4.0</lucene.version>
 
