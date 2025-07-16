@@ -4,7 +4,7 @@ import com.erigir.lucid.DatabaseIndexer;
 import com.erigir.lucid.ICustomFieldProcessor;
 import com.erigir.lucid.RowProcessedEvent;
 import com.erigir.lucid.RowProcessingListener;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
