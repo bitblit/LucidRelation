@@ -158,7 +158,7 @@
     <!-- Specify hard-coded project properties here -->
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <jackson.version>2.18.8</jackson.version>
+        <jackson.version>2.18.9</jackson.version>
         <spring.version>6.2.11</spring.version>
         <lucene.version>7.4.0</lucene.version>
 
